@@ -1,0 +1,52 @@
+# STC8G Board Definitions
+
+menu.clock=Clock Speed
+stc8g1k08a.upload.xdata_location=0
+
+# STC8G1K08A Board Definition
+stc8g1k08a.name=STC8G1K08A-8PIN
+stc8g1k08a.build.mcu=stc8g1k08a
+stc8g1k08a.build.board=STC8G1K08A
+stc8g1k08a.build.core=stc8
+stc8g1k08a.build.variant=stc8g1k08a
+stc8g1k08a.upload.tool.default=stcgal
+stc8g1k08a.upload.protocol=stc
+stc8g1k08a.upload.maximum_size=8192
+stc8g1k08a.upload.maximum_data_size=1024
+
+# Clock speed options
+stc8g1k08a.menu.clock.11MHz=11.0592 MHz
+stc8g1k08a.menu.clock.11MHz.build.f_cpu=11059200L
+stc8g1k08a.menu.clock.11MHz.build.f_cpu_khz=11059
+
+stc8g1k08a.menu.clock.12MHz=12 MHz
+stc8g1k08a.menu.clock.12MHz.build.f_cpu=12000000L
+stc8g1k08a.menu.clock.12MHz.build.f_cpu_khz=12000
+
+stc8g1k08a.menu.clock.16MHz=16 MHz
+stc8g1k08a.menu.clock.16MHz.build.f_cpu=16000000L
+stc8g1k08a.menu.clock.16MHz.build.f_cpu_khz=16000
+
+stc8g1k08a.menu.clock.20MHz=20 MHz
+stc8g1k08a.menu.clock.20MHz.build.f_cpu=20000000L
+stc8g1k08a.menu.clock.20MHz.build.f_cpu_khz=20000
+
+stc8g1k08a.menu.clock.22MHz=22.1184 MHz
+stc8g1k08a.menu.clock.22MHz.build.f_cpu=22118400L
+stc8g1k08a.menu.clock.22MHz.build.f_cpu_khz=22118
+
+stc8g1k08a.menu.clock.24MHz=24 MHz
+stc8g1k08a.menu.clock.24MHz.build.f_cpu=24000000L
+stc8g1k08a.menu.clock.24MHz.build.f_cpu_khz=24000
+
+stc8g1k08a.menu.clock.27MHz=27 MHz
+stc8g1k08a.menu.clock.27MHz.build.f_cpu=27000000L
+stc8g1k08a.menu.clock.27MHz.build.f_cpu_khz=27000
+
+stc8g1k08a.menu.clock.30MHz=30 MHz
+stc8g1k08a.menu.clock.30MHz.build.f_cpu=30000000L
+stc8g1k08a.menu.clock.30MHz.build.f_cpu_khz=30000
+
+stc8g1k08a.menu.clock.33MHz=33.1776 MHz
+stc8g1k08a.menu.clock.33MHz.build.f_cpu=33177600L
+stc8g1k08a.menu.clock.33MHz.build.f_cpu_khz=33178
