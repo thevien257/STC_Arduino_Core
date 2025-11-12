@@ -32,7 +32,7 @@ void digitalWrite(uint8_t pin, uint8_t value);
 uint8_t digitalRead(uint8_t pin);
 
 // Timer 0 mode definitions
-void delay_us(uint16_t us);
+void delay_us(uint32_t us);
 void delay_ms(uint16_t ms);
 void delay_s(uint8_t seconds);
 void timer0_micros_init(void);
