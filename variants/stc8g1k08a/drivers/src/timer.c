@@ -1,5 +1,20 @@
 #include "Arduino.h"
 
+void timer0_init()
+{
+  // Stop timer0
+  TCON &= ~(1 << 4); // TR0 = 0
+
+  // Configure Timer0: Mode 1 (16-bit non-auto-reload)
+  TMOD &= 0xF0;      // Clear T0 mode bits
+  TMOD |= 0x01;      // Mode 1: 16-bit
+  TMOD &= ~(1 << 2); // C/T = 0 (timer mode)
+  TMOD &= ~(1 << 3); // GATE = 0
+
+  // Use 1T mode for precision (1 count per clock cycle)
+  AUXR |= (1 << 7); // T0x12 = 1 (1T mode)
+}
+
 /**
  * @brief Delay for specified microseconds (blocking)
  * @param us Microseconds to delay (1 to 65535)
@@ -10,20 +25,11 @@ void delay_us(uint32_t us)
 {
   uint16_t reload_value;
   uint32_t cycles_needed;
-  
-  if (us == 0) return;
 
-  // Stop timer0
-  TCON &= ~(1 << 4); // TR0 = 0
+  if (us == 0)
+    return;
 
-  // Configure Timer0: Mode 1 (16-bit non-auto-reload) 
-  TMOD &= 0xF0;      // Clear T0 mode bits
-  TMOD |= 0x01;      // Mode 1: 16-bit
-  TMOD &= ~(1 << 2); // C/T = 0 (timer mode)
-  TMOD &= ~(1 << 3); // GATE = 0
-
-  // Use 1T mode for precision (1 count per clock cycle)
-  AUXR |= (1 << 7); // T0x12 = 1 (1T mode)
+  timer0_init();
 
   // Calculate total cycles needed
   cycles_needed = (us * (F_CPU / 1000000UL));
@@ -32,7 +38,7 @@ void delay_us(uint32_t us)
   while (cycles_needed > 0)
   {
     uint16_t cycles_this_iteration;
-    
+
     // Maximum cycles per iteration is 65535
     if (cycles_needed > 65535UL)
     {
@@ -42,27 +48,27 @@ void delay_us(uint32_t us)
     {
       cycles_this_iteration = (uint16_t)cycles_needed;
     }
-    
+
     // Timer counts up from reload_value to 65535, then sets TF0
     reload_value = 65536UL - cycles_this_iteration;
-    
+
     // Load timer
     TL0 = (uint8_t)(reload_value & 0xFF);
     TH0 = (uint8_t)(reload_value >> 8);
-    
+
     // Clear overflow flag
     TCON &= ~(1 << 5); // TF0 = 0
-    
+
     // Start timer
-    TCON |= (1 << 4);  // TR0 = 1
-    
+    TCON |= (1 << 4); // TR0 = 1
+
     // Wait for overflow
     while (!(TCON & (1 << 5)))
       ;
-    
+
     // Stop timer
     TCON &= ~(1 << 4); // TR0 = 0
-    
+
     // Subtract completed cycles
     cycles_needed -= cycles_this_iteration;
   }
@@ -71,27 +77,18 @@ void delay_us(uint32_t us)
 /**
  * @brief Delay for specified milliseconds (blocking)
  * @param ms Milliseconds to delay
- * 
+ *
  * Optimized to reduce loop overhead by using larger timer periods.
  */
 void delay_ms(uint16_t ms)
 {
   uint16_t reload_value;
   uint16_t i;
-  
-  if (ms == 0) return;
 
-  // Stop timer0
-  TCON &= ~(1 << 4); // TR0 = 0
+  if (ms == 0)
+    return;
 
-  // Configure Timer0: Mode 1 (16-bit)
-  TMOD &= 0xF0;      // Clear T0 mode bits
-  TMOD |= 0x01;      // Mode 1
-  TMOD &= ~(1 << 2); // Timer mode
-  TMOD &= ~(1 << 3); // GATE = 0
-
-  // Use 1T mode
-  AUXR |= (1 << 7);
+  timer0_init();
 
   // Calculate reload value for 1ms
   // At F_CPU Hz, 1ms = F_CPU/1000 cycles
@@ -104,17 +101,17 @@ void delay_ms(uint16_t ms)
     // Load timer for 1ms
     TL0 = (uint8_t)(reload_value & 0xFF);
     TH0 = (uint8_t)(reload_value >> 8);
-    
+
     // Clear overflow flag
     TCON &= ~(1 << 5); // TF0 = 0
-    
+
     // Start timer
-    TCON |= (1 << 4);  // TR0 = 1
-    
+    TCON |= (1 << 4); // TR0 = 1
+
     // Wait for overflow
     while (!(TCON & (1 << 5)))
       ;
-    
+
     // Stop timer
     TCON &= ~(1 << 4); // TR0 = 0
   }
