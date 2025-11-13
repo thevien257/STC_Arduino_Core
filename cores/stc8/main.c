@@ -1,5 +1,8 @@
 #include "Arduino.h"
 
+// Forward declare user's interrupt handler
+extern void timer0_isr(void) __interrupt(1);
+
 extern void setup(void);
 extern void loop(void);
 
