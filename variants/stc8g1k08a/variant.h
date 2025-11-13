@@ -2,6 +2,7 @@
 #define _VARIANT_STC8G1K08A_H_
 
 #include <stdint.h>
+#include "drivers/inc/gpio.h"
 
 // STC8G1K08A Register Definitions
 __sfr __at (0x80) P0;

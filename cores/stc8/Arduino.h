@@ -27,15 +27,15 @@ typedef struct {
 void clock_init(void);
 
 // GPIO functions
-void pinMode(uint8_t pin, uint8_t mode);
-void digitalWrite(uint8_t pin, uint8_t value);
-uint8_t digitalRead(uint8_t pin);
+// void pinMode(uint8_t pin, uint8_t mode);
+// void digitalWrite(uint8_t pin, uint8_t value);
+// uint8_t digitalRead(uint8_t pin);
 
 // Timer 0 mode definitions
+void timer0_init();
 void delay_us(uint32_t us);
 void delay_ms(uint16_t ms);
 void delay_s(uint8_t seconds);
-void timer0_micros_init(void);
 uint32_t micros(void);
 uint32_t millis(void);
 uint8_t delay_nb(uint32_t *start_time, uint32_t interval_us);
