@@ -1,6 +1,6 @@
 #!/bin/bash
-# SDCC Linker Wrapper Script for Arduino with Smart Driver Linking
-# Only links driver files that are actually needed
+# SDCC Linker Wrapper Script - Smart Driver Linking
+# Only links driver files that are actually called
 
 SDCC="$1"
 shift
@@ -14,31 +14,22 @@ while [ $# -gt 0 ]; do
     ARG="$1"
     case "$ARG" in
         *.o)
-            # Check if this is a driver file
-            if [[ "$ARG" == */drivers/src/* ]]; then
-                # This is a driver file - add to separate list
-                REL_FILE="${ARG%.o}.rel"
-                if [ -f "$ARG" ] && [ ! -f "$REL_FILE" ]; then
-                    cp "$ARG" "$REL_FILE"
-                    CLEANUP_FILES="$CLEANUP_FILES $REL_FILE"
-                fi
-                if [ -f "$REL_FILE" ]; then
+            REL_FILE="${ARG%.o}.rel"
+            if [ -f "$ARG" ] && [ ! -f "$REL_FILE" ]; then
+                cp "$ARG" "$REL_FILE"
+                CLEANUP_FILES="$CLEANUP_FILES $REL_FILE"
+            fi
+            
+            if [ -f "$REL_FILE" ]; then
+                # Separate driver files from regular files
+                if [[ "$ARG" == */drivers/src/* ]]; then
                     DRIVER_FILES="$DRIVER_FILES $REL_FILE"
-                fi
-            else
-                # Regular file - always include
-                REL_FILE="${ARG%.o}.rel"
-                if [ -f "$ARG" ] && [ ! -f "$REL_FILE" ]; then
-                    cp "$ARG" "$REL_FILE"
-                    CLEANUP_FILES="$CLEANUP_FILES $REL_FILE"
-                fi
-                if [ -f "$REL_FILE" ]; then
+                else
                     REL_FILES="$REL_FILES $REL_FILE"
                 fi
             fi
             ;;
         *.a)
-            # Convert .a to .lib
             LIB_FILE="${ARG%.a}.lib"
             if [ -f "$ARG" ] && [ ! -f "$LIB_FILE" ]; then
                 cp "$ARG" "$LIB_FILE"
@@ -60,74 +51,60 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-# First pass: Try linking WITHOUT driver files
-# >&2 echo "Attempting minimal link..."
-$SDCC $FLAGS $REL_FILES 2>&1 | tee /tmp/sdcc_link_errors.txt
-RESULT=$?
+# Iteratively resolve undefined symbols by adding needed drivers
+NEEDED_DRIVERS=""
+MAX_ITERATIONS=10
 
-# Check if there are undefined symbol warnings
-if grep -q "Undefined Global" /tmp/sdcc_link_errors.txt 2>/dev/null; then
-    # >&2 echo "Found undefined symbols, analyzing..."
+for iteration in $(seq 1 $MAX_ITERATIONS); do
+    # Try linking with current set
+    $SDCC $FLAGS $REL_FILES $NEEDED_DRIVERS > /tmp/sdcc_link_$.txt 2>&1
+    LINK_RESULT=$?
     
-    # Check which driver functions are needed
-    NEEDED_DRIVERS=""
-    ADD_GPIO=0
-    ADD_TIMER=0
-    ADD_CLOCK=0
+    # If link succeeded, we're done
+    if [ $LINK_RESULT -eq 0 ]; then
+        break
+    fi
     
-    # Read the error file and check for specific function patterns
-    while IFS= read -r line; do
-        if [[ "$line" == *"Undefined Global"* ]]; then
-            # GPIO functions
-            if [[ "$line" =~ pin|Pin|gpio|digital|Digital|analog|Analog ]]; then
-                ADD_GPIO=1
-            fi
-            # Timer/delay functions
-            if [[ "$line" =~ delay|millis|micros|timer|Timer ]]; then
-                ADD_TIMER=1
-            fi
-            # Clock functions
-            if [[ "$line" =~ clock|Clock ]]; then
-                ADD_CLOCK=1
-            fi
-        fi
-    done < /tmp/sdcc_link_errors.txt
+    # Extract undefined symbol names from error output
+    UNDEFINED=$(grep -oP "(?<=Undefined Global '_)[^']*" /tmp/sdcc_link_$.txt 2>/dev/null | head -1)
     
-    # Add the needed drivers
+    # If no undefined symbols found, stop
+    if [ -z "$UNDEFINED" ]; then
+        break
+    fi
+    
+    # Search for which driver file provides this symbol
+    FOUND_DRIVER=""
     for DRIVER in $DRIVER_FILES; do
-        if [[ "$DRIVER" == *gpio* ]] && [ $ADD_GPIO -eq 1 ]; then
-            NEEDED_DRIVERS="$NEEDED_DRIVERS $DRIVER"
-            # >&2 echo "  Adding driver: $(basename $DRIVER)"
+        # Skip if already added
+        if echo "$NEEDED_DRIVERS" | grep -q "$DRIVER"; then
+            continue
         fi
-        if [[ "$DRIVER" == *timer* ]] && [ $ADD_TIMER -eq 1 ]; then
-            NEEDED_DRIVERS="$NEEDED_DRIVERS $DRIVER"
-            # >&2 echo "  Adding driver: $(basename $DRIVER)"
-        fi
-        if [[ "$DRIVER" == *clock* ]] && [ $ADD_CLOCK -eq 1 ]; then
-            NEEDED_DRIVERS="$NEEDED_DRIVERS $DRIVER"
-            # >&2 echo "  Adding driver: $(basename $DRIVER)"
+        
+        # Check if this driver defines the symbol
+        if grep -q "^S _${UNDEFINED} Def" "$DRIVER" 2>/dev/null; then
+            FOUND_DRIVER="$DRIVER"
+            break
         fi
     done
     
-    # If we found needed drivers, retry with them
-    if [ -n "$NEEDED_DRIVERS" ]; then
-        # >&2 echo "Re-linking with required drivers..."
-        $SDCC $FLAGS $REL_FILES $NEEDED_DRIVERS
-        RESULT=$?
+    # If we found the driver, add it
+    if [ -n "$FOUND_DRIVER" ]; then
+        NEEDED_DRIVERS="$NEEDED_DRIVERS $FOUND_DRIVER"
     else
-        >&2 echo "Warning: Undefined symbols but no matching drivers found!"
-        >&2 echo "Adding ALL drivers as fallback..."
-        $SDCC $FLAGS $REL_FILES $DRIVER_FILES
-        RESULT=$?
+        # No driver provides this symbol, stop trying
+        break
     fi
-else
-    >&2 echo "Minimal link succeeded - no drivers needed!"
-fi
+done
 
-# Cleanup temporary files
+# Final link with all needed drivers
+$SDCC $FLAGS $REL_FILES $NEEDED_DRIVERS
+RESULT=$?
+
+# Cleanup
 for FILE in $CLEANUP_FILES; do
     rm -f "$FILE"
 done
-rm -f /tmp/sdcc_link_errors.txt
+rm -f /tmp/sdcc_link_$.txt
 
 exit $RESULT
