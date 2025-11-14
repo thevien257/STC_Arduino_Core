@@ -38,4 +38,6 @@ void clock_init(void)
   IRCBAND |= 0x01; // Select 33MHz band
   CLKDIV = 0x01; // No division (MCLK/1)
 #endif
+
+ P_SW2 = 0x00;  // <-- CRITICAL! You close the XDATA access
 }
