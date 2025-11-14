@@ -62,6 +62,7 @@
     "stdint.h": "c",
     "arduino.h": "c",
     "variant.h": "c",
-    "timer.h": "c"
+    "timer.h": "c",
+    "hardwareserial.h": "c"
   }
 }

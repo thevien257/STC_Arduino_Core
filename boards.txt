@@ -39,10 +39,6 @@ stc8g1k08a.menu.clock.24MHz=24 MHz
 stc8g1k08a.menu.clock.24MHz.build.f_cpu=24000000L
 stc8g1k08a.menu.clock.24MHz.build.f_cpu_khz=24000
 
-stc8g1k08a.menu.clock.27MHz=27 MHz
-stc8g1k08a.menu.clock.27MHz.build.f_cpu=27000000L
-stc8g1k08a.menu.clock.27MHz.build.f_cpu_khz=27000
-
 stc8g1k08a.menu.clock.30MHz=30 MHz
 stc8g1k08a.menu.clock.30MHz.build.f_cpu=30000000L
 stc8g1k08a.menu.clock.30MHz.build.f_cpu_khz=30000
