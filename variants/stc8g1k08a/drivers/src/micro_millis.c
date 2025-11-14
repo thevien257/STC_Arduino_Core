@@ -1,8 +1,8 @@
 #include "Arduino.h"
 
 static volatile uint8_t timer_initialized = 0;
-static volatile uint32_t _millis = 0;
-static volatile uint32_t _micros_overflow = 0;
+static volatile __xdata uint32_t _millis = 0;
+static volatile __xdata uint32_t _micros_overflow = 0;
 
 // Store timer configuration for micros calculation
 static uint16_t timer_reload_value = 0;
