@@ -12,25 +12,29 @@ compiler.warning_flags=--less-pedantic
 # Compiler commands
 compiler.c.cmd=sdcc
 compiler.c.wrapper=sdcc.sh
-compiler.c.flags=-MMD -c -Ddouble=float -DUSE_STDINT -D__PROG_TYPES_COMPAT__ {compiler.warning_flags}
-
 compiler.cpp.cmd=sdcc
 compiler.cpp.wrapper=sdcc.sh
-compiler.cpp.flags={compiler.c.flags}
-
 compiler.ar.cmd=sdar
 compiler.ar.wrapper=sdar.sh
-compiler.ar.flags=rcs
-
 compiler.c.elf.cmd=sdcc
 compiler.c.elf.wrapper=sdcc-link.sh
-compiler.c.elf.flags=--nostdlib --code-size {upload.maximum_size} --xram-size {upload.maximum_data_size} --xram-loc {upload.xdata_location}
-
 compiler.elf2hex.cmd=packihx
 compiler.elf2hex.wrapper=packihx.sh
 compiler.size.cmd=cat
 
-# System includes (adjust if SDCC is in different location)
+# OS-specific wrapper extensions
+compiler.c.wrapper.windows=sdcc.bat
+compiler.cpp.wrapper.windows=sdcc.bat
+compiler.ar.wrapper.windows=sdar.bat
+compiler.c.elf.wrapper.windows=sdcc-link.bat
+compiler.elf2hex.wrapper.windows=packihx.bat
+
+compiler.c.flags=-MMD -c -Ddouble=float -DUSE_STDINT -D__PROG_TYPES_COMPAT__ {compiler.warning_flags}
+compiler.cpp.flags={compiler.c.flags}
+compiler.ar.flags=rcs
+compiler.c.elf.flags=--nostdlib --code-size {upload.maximum_size} --xram-size {upload.maximum_data_size} --xram-loc {upload.xdata_location}
+
+# System includes
 compiler.systemincludes="-I{runtime.tools.sdcc.path}/share/sdcc/include"
 
 # Build extra flags
@@ -40,7 +44,7 @@ build.extra_flags=
 ## Compile c files
 recipe.c.o.pattern="{compiler.wrapper.path}/{compiler.c.wrapper}" "{compiler.path}{compiler.c.cmd}" "{source_file}" "{object_file}" c {compiler.c.flags} -mmcs51 -D{build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.extra_flags} {includes} {compiler.systemincludes}
 
-## Compile cpp files (wrapper handles .cpp -> .c conversion)
+## Compile cpp files
 recipe.cpp.o.pattern="{compiler.wrapper.path}/{compiler.cpp.wrapper}" "{compiler.path}{compiler.cpp.cmd}" "{source_file}" "{object_file}" cpp {compiler.cpp.flags} -mmcs51 -D{build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.extra_flags} {includes} {compiler.systemincludes}
 
 ## Create archives
@@ -62,12 +66,13 @@ preproc.macros.flags=-E -dM
 recipe.preproc.macros="{compiler.wrapper.path}/{compiler.cpp.wrapper}" "{compiler.path}{compiler.cpp.cmd}" "{source_file}" "{preprocessed_file_path}" preproc {compiler.cpp.flags} {preproc.macros.flags} -mmcs51 -D{build.mcu} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {build.extra_flags} {includes} {compiler.systemincludes}
 
 # Upload using stcgal with frequency setting
-tools.stcgal.cmd=stcgal
+tools.stcgal.cmd=stcgal.sh
+tools.stcgal.cmd.windows=stcgal.bat
 tools.stcgal.path={runtime.tools.stcgal.path}
 tools.stcgal.upload.params.verbose=-v
 tools.stcgal.upload.params.quiet=
-# Pass -t option to set target frequency in kHz (convert F_CPU from Hz to kHz)
-tools.stcgal.upload.pattern="{cmd}" -p {serial.port} -t {build.f_cpu_khz} "{build.path}/{build.project_name}.ihx"
+tools.stcgal.upload.pattern="{path}/{cmd}" -p {serial.port} -t {build.f_cpu_khz} "{build.path}/{build.project_name}.ihx"
+
 
 # USB Default Flags
 build.usb_flags=-DUSB_VID={build.vid} -DUSB_PID={build.pid} '-DUSB_MANUFACTURER={build.usb_manufacturer}' '-DUSB_PRODUCT={build.usb_product}'
