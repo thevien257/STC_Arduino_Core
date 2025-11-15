@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "variant.h"
 #include "HardwareSerial.h"
+#include "interrupt.h"
 
 // Arduino Pin Definitions (map to STC8G pins)
 #define LED_BUILTIN 13
@@ -72,14 +73,6 @@
 #define MAKE_WORD(h, l) ((uint16_t)(((h) << 8) | (l)))
 
 // ====================================================================================
-
-// PinMap structure
-typedef struct {
-    uint8_t port;
-    uint8_t bit;
-    uint8_t mask;
-} PinMap;
-
 void clock_init(void);
 
 // GPIO functions

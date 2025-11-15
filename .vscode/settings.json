@@ -63,6 +63,7 @@
     "arduino.h": "c",
     "variant.h": "c",
     "timer.h": "c",
-    "hardwareserial.h": "c"
+    "hardwareserial.h": "c",
+    "interrupt.h": "c"
   }
 }
