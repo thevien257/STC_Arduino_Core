@@ -12,12 +12,12 @@
         {
           "name": "STC8G Boards",
           "architecture": "stc8g",
-          "version": "1.0.0",
+          "version": "1.0.1",
           "category": "Contributed",
-          "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.0.tar.gz",
-          "archiveFileName": "STC_Arduino_Core-1.0.0.tar.gz",
-          "checksum": "SHA-256:15ea40ad2faf5c7babf6861c964da9c4159d75a9c8cee7ef6769a7a2140443fb",
-          "size": "17654",
+          "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.1.tar.gz",
+          "archiveFileName": "STC_Arduino_Core-1.0.1.tar.gz",
+          "checksum": "SHA-256:801633c5f98bec82c36bb10f14f95bb273df330ce29e961c146c7af96b01743e",
+          "size": "18431",
           "boards": [{ "name": "STC8G1K08A" }],
           "toolsDependencies": [
             {
@@ -40,10 +40,17 @@
           "systems": [
             {
               "host": "x86_64-pc-linux-gnu",
-              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.0/sdcc-4.5.13-linux-x86_64.tar.gz",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.1/sdcc-4.5.13-linux-x86_64.tar.gz",
               "archiveFileName": "sdcc-4.5.13-linux-x86_64.tar.gz",
               "checksum": "SHA-256:9d39fad14d188fa3b89156fc3d52418e5a81465ab982e9f6a025552470e28f57",
               "size": "34603008"
+            },
+            {
+              "host": "x86_64-mingw32",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.1/sdcc-4.5.13-windows-x86_64.zip",
+              "archiveFileName": "sdcc-4.5.13-windows-x86_64.zip",
+              "checksum": "SHA-256:120b0921713eb72164362792d0d680040b50dc158afae449688df24c5067d489",
+              "size": "42428486"
             }
           ]
         },
@@ -53,10 +60,17 @@
           "systems": [
             {
               "host": "x86_64-pc-linux-gnu",
-              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.0/stcgal-1.0.0-linux-x86_64.tar.gz",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.1/stcgal-1.0.0-linux-x86_64.tar.gz",
               "archiveFileName": "stcgal-1.0.0-linux-x86_64.tar.gz",
               "checksum": "SHA-256:a489dc1865985f8e169a296db34f27f11a5cd39b4b9adb4d537da1605b09148d",
               "size": "488448"
+            },
+            {
+              "host": "x86_64-mingw32",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.1/stcgal-1.0.0-windows-x86_64.zip",
+              "archiveFileName": "stcgal-1.0.0-windows-x86_64.zip",
+              "checksum": "SHA-256:177dbb5645ce2737212cab76f7937637d0db370620fd8867544a32afbdb365d4",
+              "size": "730403"
             }
           ]
         }
