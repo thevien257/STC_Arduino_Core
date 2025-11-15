@@ -23,6 +23,9 @@ typedef struct
     void (*write)(uint8_t byte);
     void (*print)(const char *str);
     void (*println)(const char *str);
+    void (*printNumber)(int32_t num) __reentrant;
+    void (*readString)(char *buffer, uint8_t max_len) __reentrant;  // Original
+    char* (*readLine)(void) __reentrant;  // NEW - returns pointer to static buffer
 } Serial_t;
 
 // External Serial object

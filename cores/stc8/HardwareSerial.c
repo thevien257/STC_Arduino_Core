@@ -1,26 +1,18 @@
 #include "HardwareSerial.h"
 #include "variant.h"
 
-// Circular buffers for RX and TX
+// Circular buffer for RX only
 #define SERIAL_RX_BUFFER_SIZE 64
-#define SERIAL_TX_BUFFER_SIZE 64
 
-// Move buffers to XRAM to save internal RAM
+// Move buffer to XRAM to save internal RAM
 static volatile __xdata uint8_t rx_buffer[SERIAL_RX_BUFFER_SIZE];
 static volatile uint8_t rx_head = 0;
 static volatile uint8_t rx_tail = 0;
 
-static volatile __xdata uint8_t tx_buffer[SERIAL_TX_BUFFER_SIZE];
-static volatile uint8_t tx_head = 0;
-static volatile uint8_t tx_tail = 0;
-
 static UartPinSelect_t current_pins = UART_PINS_DEFAULT;
 
-#ifndef UART1_PIN_SELECT
-#define UART1_PIN_SELECT S1_S_P30_P31 // Default: P3.0/P3.1
-#endif
-
-static volatile uint8_t tx_transmitting = 0;
+#define SERIAL_LINE_BUFFER_SIZE 64
+static __xdata char serial_line_buffer[SERIAL_LINE_BUFFER_SIZE];
 
 void uart1_isr(void) __interrupt(4)
 {
@@ -38,25 +30,6 @@ void uart1_isr(void) __interrupt(4)
 
     CLEAR_BIT(SCON, 0); // Clear RI
   }
-
-  // Handle transmit interrupt
-  if (READ_BIT(SCON, 1)) // TI flag
-  {
-    CLEAR_BIT(SCON, 1); // Clear TI immediately
-
-    // Check if more data to send
-    if (tx_head != tx_tail)
-    {
-      // Send next byte
-      SBUF = tx_buffer[tx_tail];
-      tx_tail = (tx_tail + 1) % SERIAL_TX_BUFFER_SIZE;
-    }
-    else
-    {
-      // Nothing more to send
-      tx_transmitting = 0;
-    }
-  }
 }
 
 // Calculate Timer1 reload value for baud rate using Mode 0 with 1T
@@ -68,7 +41,7 @@ static uint16_t calculate_timer1_reload(uint32_t baud)
   return (uint16_t)reload;
 }
 
-static void serial_begin_with_pins(uint32_t baud, UartPinSelect_t pins)  __reentrant
+static void serial_begin_with_pins(uint32_t baud, UartPinSelect_t pins) __reentrant
 {
   uint16_t reload;
   current_pins = pins;
@@ -135,12 +108,9 @@ static void serial_begin_with_pins(uint32_t baud, UartPinSelect_t pins)  __reent
   // Start Timer1
   SET_BIT(TCON, 6); // TR1 = 1
 
-  // Reset buffers
+  // Reset RX buffer
   rx_head = 0;
   rx_tail = 0;
-  tx_head = 0;
-  tx_tail = 0;
-  tx_transmitting = 0;
 
   // Enable UART interrupt
   SET_BIT(IE, 4); // ES = 1
@@ -149,29 +119,6 @@ static void serial_begin_with_pins(uint32_t baud, UartPinSelect_t pins)  __reent
 
 static void serial_begin(uint32_t baud)
 {
-  //   uint16_t reload;
-
-  //   // Configure UART1 pin switching
-  //   P_SW1 = (P_SW1 & 0x3F) | UART1_PIN_SELECT;
-
-  // #if UART1_PIN_SELECT == S1_S_P30_P31
-  //   // Default pins - no extra config needed
-  // #elif UART1_PIN_SELECT == S1_S_P32_P33
-  //   SET_BIT(P_SW2, 7);
-  //   CLEAR_BIT(P3M1, 2);
-  //   CLEAR_BIT(P3M0, 2);
-  //   CLEAR_BIT(P3M1, 3);
-  //   CLEAR_BIT(P3M0, 3);
-  //   CLEAR_BIT(P_SW2, 7);
-  // #elif UART1_PIN_SELECT == S1_S_P54_P55
-  //   SET_BIT(P_SW2, 7);
-  //   CLEAR_BIT(P5M1, 4);
-  //   CLEAR_BIT(P5M0, 4);
-  //   CLEAR_BIT(P5M1, 5);
-  //   CLEAR_BIT(P5M0, 5);
-  //   CLEAR_BIT(P_SW2, 7);
-  // #endif
-
   // Use default pins
   serial_begin_with_pins(baud, UART_PINS_DEFAULT);
 }
@@ -200,30 +147,15 @@ static int serial_read(void)
   return data;
 }
 
+// Blocking write - waits for previous transmission to complete
 static void serial_write(uint8_t byte)
 {
-  uint8_t next_head = (tx_head + 1) % SERIAL_TX_BUFFER_SIZE;
-
-  // Wait if buffer is full
-  while (next_head == tx_tail)
+  SBUF = byte; // Send the byte
+  // Wait for previous transmission to complete
+  while (!READ_BIT(SCON, 1)) // Wait while TI is 0
     ;
 
-  // Disable interrupts for atomic operation
-  CLEAR_BIT(IE, 4);
-
-  // Add byte to buffer
-  tx_buffer[tx_head] = byte;
-  tx_head = next_head;
-
-  // Start transmission if not already transmitting
-  if (!tx_transmitting)
-  {
-    tx_transmitting = 1;
-    SBUF = tx_buffer[tx_tail];
-    tx_tail = (tx_tail + 1) % SERIAL_TX_BUFFER_SIZE;
-  }
-
-  SET_BIT(IE, 4); // Re-enable interrupts
+  CLEAR_BIT(SCON, 1); // Clear TI flag
 }
 
 static void serial_print(const char *str)
@@ -241,6 +173,127 @@ static void serial_println(const char *str)
   serial_write('\n');
 }
 
+// Print a number (supports int32_t)
+static void serial_print_number(int32_t num) __reentrant
+{
+  char buffer[12]; // -2147483648 is 11 chars + null
+  char *ptr = buffer + sizeof(buffer) - 1;
+  uint32_t abs_num;
+  uint8_t is_negative = 0;
+
+  *ptr = '\0';
+
+  // Handle negative numbers
+  if (num < 0)
+  {
+    is_negative = 1;
+    abs_num = (uint32_t)(-num);
+  }
+  else
+  {
+    abs_num = (uint32_t)num;
+  }
+
+  // Handle zero case
+  if (abs_num == 0)
+  {
+    *(--ptr) = '0';
+  }
+  else
+  {
+    // Convert to string (reverse order)
+    while (abs_num > 0)
+    {
+      *(--ptr) = '0' + (abs_num % 10);
+      abs_num /= 10;
+    }
+  }
+
+  // Add negative sign if needed
+  if (is_negative)
+  {
+    *(--ptr) = '-';
+  }
+
+  // Print the string
+  serial_print(ptr);
+}
+
+// Read string until newline or timeout (simple version)
+static void serial_read_string(char *buffer, uint8_t max_len) __reentrant
+{
+  uint8_t index = 0;
+  int c;
+  uint16_t timeout = 0;
+  const uint16_t max_timeout = 10000; // Adjust as needed
+
+  while (index < (max_len - 1))
+  {
+    c = serial_read();
+
+    if (c == -1)
+    {
+      // No data available, increment timeout
+      timeout++;
+      if (timeout >= max_timeout)
+      {
+        break;
+      }
+      continue;
+    }
+
+    // Reset timeout when data received
+    timeout = 0;
+
+    // Check for newline or carriage return
+    if (c == '\n' || c == '\r')
+    {
+      break;
+    }
+
+    // Add character to buffer
+    buffer[index++] = (char)c;
+  }
+
+  // Null terminate
+  buffer[index] = '\0';
+}
+
+static char *serial_read_line(void) __reentrant
+{
+  uint8_t index = 0;
+  int c;
+  uint16_t timeout = 0;
+  const uint16_t max_timeout = 10000;
+
+  while (index < (sizeof(serial_line_buffer) - 1))
+  {
+    c = serial_read();
+
+    if (c == -1)
+    {
+      timeout++;
+      if (timeout >= max_timeout)
+      {
+        break;
+      }
+      continue;
+    }
+
+    timeout = 0;
+
+    if (c == '\n' || c == '\r')
+    {
+      break;
+    }
+
+    serial_line_buffer[index++] = (char)c;
+  }
+
+  serial_line_buffer[index] = '\0';
+  return serial_line_buffer;
+}
+
 // Serial object instance
 Serial_t Serial = {
     .begin = serial_begin,
@@ -251,4 +304,7 @@ Serial_t Serial = {
     .write = serial_write,
     .print = serial_print,
     .println = serial_println,
+    .printNumber = serial_print_number,
+    .readString = serial_read_string,
+    .readLine = serial_read_line, // NEW
 };
