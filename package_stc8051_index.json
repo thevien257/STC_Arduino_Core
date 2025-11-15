@@ -1,0 +1,68 @@
+{
+  "packages": [
+    {
+      "name": "stc8051",
+      "maintainer": "thevien257",
+      "websiteURL": "https://github.com/thevien257/STC_Arduino_Core",
+      "email": "your@email.com",
+      "help": {
+        "online": "https://github.com/thevien257/STC_Arduino_Core/issues"
+      },
+      "platforms": [
+        {
+          "name": "STC8G Boards",
+          "architecture": "stc8g",
+          "version": "1.0.0",
+          "category": "Contributed",
+          "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.0.tar.gz",
+          "archiveFileName": "STC_Arduino_Core-1.0.0.tar.gz",
+          "checksum": "SHA-256:CALCULATE_AFTER_TAGGING",
+          "size": "50000",
+          "boards": [
+            {"name": "STC8G1K08A"}
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "stc8051",
+              "name": "sdcc",
+              "version": "4.5.13"
+            },
+            {
+              "packager": "stc8051",
+              "name": "stcgal",
+              "version": "1.0.0"
+            }
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "sdcc",
+          "version": "4.5.13",
+          "systems": [
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.0/sdcc-4.5.13-linux-x86_64.tar.gz",
+              "archiveFileName": "sdcc-4.5.13-linux-x86_64.tar.gz",
+              "checksum": "SHA-256:9d39fad14d188fa3b89156fc3d52418e5a81465ab982e9f6a025552470e28f57",
+              "size": "34603008"
+            }
+          ]
+        },
+        {
+          "name": "stcgal",
+          "version": "1.0.0",
+          "systems": [
+            {
+              "host": "x86_64-pc-linux-gnu",
+              "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.0/stcgal-1.0.0-linux-x86_64.tar.gz",
+              "archiveFileName": "stcgal-1.0.0-linux-x86_64.tar.gz",
+              "checksum": "SHA-256:a489dc1865985f8e169a296db34f27f11a5cd39b4b9adb4d537da1605b09148d",
+              "size": "488448"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

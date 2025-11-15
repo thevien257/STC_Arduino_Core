@@ -57,7 +57,7 @@ MAX_ITERATIONS=10
 
 for iteration in $(seq 1 $MAX_ITERATIONS); do
     # Try linking with current set
-    $SDCC $FLAGS $REL_FILES $NEEDED_DRIVERS > /tmp/sdcc_link_$$.txt 2>&1
+    $SDCC $FLAGS $REL_FILES $NEEDED_DRIVERS > /tmp/sdcc_link_$.txt 2>&1
     LINK_RESULT=$?
     
     # If link succeeded, we're done
@@ -66,19 +66,10 @@ for iteration in $(seq 1 $MAX_ITERATIONS); do
     fi
     
     # Extract undefined symbol names from error output
-    # The format is: "?ASlink-Warning-Undefined Global _symbol_name referenced by module"
-    # We want to extract "symbol_name" (without the leading underscore)
-    UNDEFINED=$(grep -oP "(?<=Undefined Global _)[^\s]+" /tmp/sdcc_link_$$.txt 2>/dev/null | head -1)
-    
-    # If that didn't work, try alternative format
-    if [ -z "$UNDEFINED" ]; then
-        UNDEFINED=$(grep -oP "(?<=Undefined: _)[^\s]+" /tmp/sdcc_link_$$.txt 2>/dev/null | head -1)
-    fi
+    UNDEFINED=$(grep -oP "(?<=Undefined Global '_)[^']*" /tmp/sdcc_link_$.txt 2>/dev/null | head -1)
     
     # If no undefined symbols found, stop
     if [ -z "$UNDEFINED" ]; then
-        # Show the actual error and exit
-        cat /tmp/sdcc_link_$$.txt >&2
         break
     fi
     
@@ -90,7 +81,7 @@ for iteration in $(seq 1 $MAX_ITERATIONS); do
             continue
         fi
         
-        # Check if this driver defines the symbol (look for "S _symbol Def")
+        # Check if this driver defines the symbol
         if grep -q "^S _${UNDEFINED} Def" "$DRIVER" 2>/dev/null; then
             FOUND_DRIVER="$DRIVER"
             break
@@ -102,7 +93,6 @@ for iteration in $(seq 1 $MAX_ITERATIONS); do
         NEEDED_DRIVERS="$NEEDED_DRIVERS $FOUND_DRIVER"
     else
         # No driver provides this symbol, stop trying
-        cat /tmp/sdcc_link_$$.txt >&2
         break
     fi
 done
@@ -115,6 +105,6 @@ RESULT=$?
 for FILE in $CLEANUP_FILES; do
     rm -f "$FILE"
 done
-rm -f /tmp/sdcc_link_$$.txt
+rm -f /tmp/sdcc_link_$.txt
 
 exit $RESULT

@@ -3,7 +3,7 @@ name=STC8G Boards
 version=1.0.0
 
 # Compiler paths
-compiler.path=
+compiler.path={runtime.tools.sdcc.path}/bin/
 compiler.wrapper.path={runtime.platform.path}/tools/wrapper
 
 # Warning flags
@@ -31,7 +31,7 @@ compiler.elf2hex.wrapper=packihx.sh
 compiler.size.cmd=cat
 
 # System includes (adjust if SDCC is in different location)
-compiler.systemincludes="-I/usr/share/sdcc/include"
+compiler.systemincludes="-I{runtime.tools.sdcc.path}/share/sdcc/include"
 
 # Build extra flags
 build.extra_flags=
@@ -47,7 +47,7 @@ recipe.cpp.o.pattern="{compiler.wrapper.path}/{compiler.cpp.wrapper}" "{compiler
 recipe.ar.pattern="{compiler.wrapper.path}/{compiler.ar.wrapper}" "{compiler.path}{compiler.ar.cmd}" "{archive_file_path}" "{object_file}" ar {compiler.ar.flags}
 
 ## Combine/Link
-recipe.c.combine.pattern="{compiler.wrapper.path}/{compiler.c.elf.wrapper}" "{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-L{build.path}" "-L/usr/share/sdcc/lib/small" -mmcs51 -D{build.mcu} {object_files} "{build.path}/{archive_file}" -lmcs51 -llibsdcc -lliblong -lliblonglong -llibint -llibfloat --out-fmt-ihx -o "{build.path}/{build.project_name}.ihx"
+recipe.c.combine.pattern="{compiler.wrapper.path}/{compiler.c.elf.wrapper}" "{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-L{build.path}" "-L{runtime.tools.sdcc.path}/share/sdcc/lib/small" -mmcs51 -D{build.mcu} {object_files} "{build.path}/{archive_file}" -lmcs51 -llibsdcc -lliblong -lliblonglong -llibint -llibfloat --out-fmt-ihx -o "{build.path}/{build.project_name}.ihx"
 
 ## Create hex
 recipe.objcopy.hex.pattern="{compiler.wrapper.path}/{compiler.elf2hex.wrapper}" "{compiler.path}{compiler.elf2hex.cmd}" "{build.path}/{build.project_name}.ihx" "{build.path}/{build.project_name}.hex"
@@ -63,7 +63,7 @@ recipe.preproc.macros="{compiler.wrapper.path}/{compiler.cpp.wrapper}" "{compile
 
 # Upload using stcgal with frequency setting
 tools.stcgal.cmd=stcgal
-tools.stcgal.path=
+tools.stcgal.path={runtime.tools.stcgal.path}
 tools.stcgal.upload.params.verbose=-v
 tools.stcgal.upload.params.quiet=
 # Pass -t option to set target frequency in kHz (convert F_CPU from Hz to kHz)
