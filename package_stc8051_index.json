@@ -4,7 +4,7 @@
       "name": "stc8051",
       "maintainer": "thevien257",
       "websiteURL": "https://github.com/thevien257/STC_Arduino_Core",
-      "email": "your@email.com",
+      "email": "thevien2507@gmail.com",
       "help": {
         "online": "https://github.com/thevien257/STC_Arduino_Core/issues"
       },
@@ -16,11 +16,9 @@
           "category": "Contributed",
           "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.0.tar.gz",
           "archiveFileName": "STC_Arduino_Core-1.0.0.tar.gz",
-          "checksum": "SHA-256:CALCULATE_AFTER_TAGGING",
-          "size": "50000",
-          "boards": [
-            {"name": "STC8G1K08A"}
-          ],
+          "checksum": "SHA-256:91de071a104eadb3e46adf868e4c69307cd3412965aad4382abe867c04df1a2c",
+          "size": "16336",
+          "boards": [{ "name": "STC8G1K08A" }],
           "toolsDependencies": [
             {
               "packager": "stc8051",
