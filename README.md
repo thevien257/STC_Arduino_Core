@@ -10,7 +10,7 @@ Arduino support for STC8G microcontrollers.
 2. Go to **File > Preferences**
 3. Add this URL to **Additional Boards Manager URLs**:
 ```
-   https://raw.githubusercontent.com/thevien257/STC_Arduino_Core/main/package_stc8051_index.json
+   https://raw.githubusercontent.com/thevien257/STC_Arduino_Core/refs/heads/main/package_stc8051_index.json
 ```
 4. Go to **Tools > Board > Boards Manager**
 5. Search for "STC8G"
