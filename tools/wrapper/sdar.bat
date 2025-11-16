@@ -13,7 +13,7 @@ set OBJECT_REL=%OBJECT:.o=.rel%
 
 if exist %OBJECT% copy /Y %OBJECT% %OBJECT_REL% >nul
 
-%SDAR% %1 %2 %3 %4 %ARCHIVE_LIB% %OBJECT_REL%
+%SDAR% %1 %2 %3 %4 %ARCHIVE_LIB% %OBJECT_REL% 2>nul
 
 if exist %ARCHIVE_LIB% copy /Y %ARCHIVE_LIB% %ARCHIVE% >nul
 
