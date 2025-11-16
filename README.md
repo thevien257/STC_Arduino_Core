@@ -37,6 +37,8 @@ Arduino support for STC8 microcontrollers with a familiar Arduino-like API.
 4. Upload your sketch
 
 ## Arduino API Reference
+Below are the APIs that have been successfully tested. More APIs are currently under development.
+
 
 ### Digital I/O
 
@@ -144,7 +146,7 @@ void loop() {
 
 ### External Interrupts
 
-> Note: Note: P3_2 and P3_3 can using FALLING, RISING or CHANGE modes, while other pins only support FALLING mode.
+> Note: P3_2 and P3_3 can using FALLING, RISING or CHANGE modes, while other pins only support FALLING mode.
 
 ```cpp
 // Interrupt modes
@@ -276,17 +278,11 @@ Contributions are welcome! Please:
 2. Create a feature branch
 3. Submit a pull request
 
-## License
-
-This project is open source. See individual file headers for specific licenses.
-
 ## Resources
 
 - **GitHub Repository:** https://github.com/thevien257/STC_Arduino_Core
 - **STC8G Documentation:** (https://www.stcmicro.com/stc/stc8g1k08.html
 - **Arduino Reference:** https://www.arduino.cc/reference/en/
 
-## Credits
-
-Created by thevien257  
-Based on SDCC compiler and stcgal programmer
+## Submit Bugs
+I would appreciate if you could submit any bugs or issues you find on the [GitHub Issues Page](https://github.com/thevien257/STC_Arduino_Core/issues).
