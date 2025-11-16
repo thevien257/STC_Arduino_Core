@@ -10,7 +10,7 @@
       },
       "platforms": [
         {
-          "name": "STC8 Boards",
+          "name": "STC Boards",
           "architecture": "stc8",
           "version": "1.0.1",
           "category": "Contributed",
@@ -33,7 +33,7 @@
           ]
         },
         {
-          "name": "STC8 Boards",
+          "name": "STC Boards",
           "architecture": "stc8",
           "version": "1.0.0",
           "category": "Contributed",
