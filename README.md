@@ -229,14 +229,16 @@ Connect a USB-to-TTL adapter to your STC8 board:
 ## Clock Frequencies
 
 Supported internal RC oscillator frequencies:
-- 24 MHz
-- 22.1184 MHz
-- 20 MHz
-- 16 MHz
-- 12 MHz
 - 11.0592 MHz (default)
+- 12 MHz
+- 16 MHz
+- 20 MHz
+- 22.1184 MHz
+- 24 MHz
+- 30 MHz
+- 33.1776 MHz
 
-Select frequency via **Tools → Clock** menu.
+Select frequency via **Tools → Clock Speed** menu.
 
 ## Programming Notes
 
