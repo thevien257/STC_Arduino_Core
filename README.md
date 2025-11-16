@@ -25,9 +25,13 @@ Arduino support for STC8 microcontrollers with a familiar Arduino-like API.
 
 - STC8G1K08A (8KB Flash, 1KB RAM)
 
+### OS Supported
+- Windows
+- Linux
+
 ## Usage
 
-1. Select **Tools → Board → STC Boards → STC8G1K08A**
+1. Select **Tools → Board → STC Boards → STC8G1K08A-8PIN**
 2. Select your clock frequency under **Tools → Clock**
 3. Select your serial port under **Tools → Port**
 4. Upload your sketch
