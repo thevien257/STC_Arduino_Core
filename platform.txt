@@ -34,8 +34,9 @@ compiler.cpp.flags={compiler.c.flags}
 compiler.ar.flags=rcs
 compiler.c.elf.flags=--nostdlib --code-size {upload.maximum_size} --xram-size {upload.maximum_data_size} --xram-loc {upload.xdata_location}
 
-# System includes
+# System includes (Linux has share/sdcc, Windows doesn't)
 compiler.systemincludes="-I{runtime.tools.sdcc.path}/share/sdcc/include"
+compiler.systemincludes.windows="-I{runtime.tools.sdcc.path}/include"
 
 # Build extra flags
 build.extra_flags=
@@ -50,8 +51,12 @@ recipe.cpp.o.pattern="{compiler.wrapper.path}/{compiler.cpp.wrapper}" "{compiler
 ## Create archives
 recipe.ar.pattern="{compiler.wrapper.path}/{compiler.ar.wrapper}" "{compiler.path}{compiler.ar.cmd}" "{archive_file_path}" "{object_file}" ar {compiler.ar.flags}
 
+# SDCC library path (different on Linux vs Windows)
+compiler.sdcc.libpath={runtime.tools.sdcc.path}/share/sdcc/lib/small
+compiler.sdcc.libpath.windows={runtime.tools.sdcc.path}/lib/small
+
 ## Combine/Link
-recipe.c.combine.pattern="{compiler.wrapper.path}/{compiler.c.elf.wrapper}" "{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-L{build.path}" "-L{runtime.tools.sdcc.path}/share/sdcc/lib/small" -mmcs51 -D{build.mcu} {object_files} "{build.path}/{archive_file}" -lmcs51 -llibsdcc -lliblong -lliblonglong -llibint -llibfloat --out-fmt-ihx -o "{build.path}/{build.project_name}.ihx"
+recipe.c.combine.pattern="{compiler.wrapper.path}/{compiler.c.elf.wrapper}" "{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-L{build.path}" "-L{compiler.sdcc.libpath}" -mmcs51 -D{build.mcu} {object_files} "{build.path}/{archive_file}" -lmcs51 -llibsdcc -lliblong -lliblonglong -llibint -llibfloat --out-fmt-ihx -o "{build.path}/{build.project_name}.ihx"
 
 ## Create hex
 recipe.objcopy.hex.pattern="{compiler.wrapper.path}/{compiler.elf2hex.wrapper}" "{compiler.path}{compiler.elf2hex.cmd}" "{build.path}/{build.project_name}.ihx" "{build.path}/{build.project_name}.hex"
