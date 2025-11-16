@@ -256,7 +256,7 @@ Select frequency via **Tools → Clock Speed** menu.
 ### SDCC Specific
 - This core uses SDCC compiler
 - Some C++ features may be limited
-- Use `__reentrant` for recursive functions
+- Use `__reentrant` on Serial functions with parameters to ensure interrupt-safe execution under SDCC.
 - Global variables default to internal RAM (limited to 256 bytes)
 
 <!-- ## Troubleshooting
