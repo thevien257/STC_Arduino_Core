@@ -32,7 +32,7 @@ Arduino support for STC8 microcontrollers with a familiar Arduino-like API.
 ## Usage
 
 1. Select **Tools → Board → STC Boards → STC8G1K08A-8PIN**
-2. Select your clock frequency under **Tools → Clock**
+2. Select your clock frequency under **Tools → Clock Speed**
 3. Select your serial port under **Tools → Port**
 4. Upload your sketch
 
