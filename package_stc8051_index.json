@@ -16,8 +16,8 @@
           "category": "Contributed",
           "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.1.tar.gz",
           "archiveFileName": "STC_Arduino_Core-1.0.1.tar.gz",
-          "checksum": "SHA-256:b0cfe095a685c984357e739dfa4d659380465ed6af4e0dab507f6f14f63d85f3",
-          "size": "19064",
+          "checksum": "SHA-256:e73de15a0d09ea8c6608c9d95ef815c6a3db2fb805fb82c79e7e38e21f61e104",
+          "size": "19130",
           "boards": [{ "name": "STC8G1K08A" }],
           "toolsDependencies": [
             {
