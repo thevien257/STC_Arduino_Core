@@ -31,6 +31,29 @@
               "version": "1.0.0"
             }
           ]
+        },
+        {
+          "name": "STC8G Boards",
+          "architecture": "stc8g",
+          "version": "1.0.0",
+          "category": "Contributed",
+          "url": "https://github.com/thevien257/STC_Arduino_Core/archive/refs/tags/v1.0.0.tar.gz",
+          "archiveFileName": "STC_Arduino_Core-1.0.0.tar.gz",
+          "checksum": "SHA-256:15ea40ad2faf5c7babf6861c964da9c4159d75a9c8cee7ef6769a7a2140443fb",
+          "size": "17654",
+          "boards": [{ "name": "STC8G1K08A" }],
+          "toolsDependencies": [
+            {
+              "packager": "stc8051",
+              "name": "sdcc",
+              "version": "4.5.13"
+            },
+            {
+              "packager": "stc8051",
+              "name": "stcgal",
+              "version": "1.0.0"
+            }
+          ]
         }
       ],
       "tools": [
