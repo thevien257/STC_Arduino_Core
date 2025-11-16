@@ -13,7 +13,7 @@ Arduino support for STC8G microcontrollers.
    https://raw.githubusercontent.com/thevien257/STC_Arduino_Core/refs/heads/main/package_stc8051_index.json
 ```
 4. Go to **Tools > Board > Boards Manager**
-5. Search for "STC8G"
+5. Search for "STC8051"
 6. Click **Install**
 
 ### Requirements

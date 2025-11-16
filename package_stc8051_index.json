@@ -49,8 +49,8 @@
               "host": "x86_64-mingw32",
               "url": "https://github.com/thevien257/STC_Arduino_Core/releases/download/v1.0.1/sdcc-4.5.13-windows-x86_64.zip",
               "archiveFileName": "sdcc-4.5.13-windows-x86_64.zip",
-              "checksum": "SHA-256:120b0921713eb72164362792d0d680040b50dc158afae449688df24c5067d489",
-              "size": "42428486"
+              "checksum": "SHA-256:8d6f846e633d503746b629d95175dad57fbf9d54b568898c0421020ac47a292a",
+              "size": "42389816"
             }
           ]
         },
