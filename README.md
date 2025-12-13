@@ -39,7 +39,6 @@ Arduino support for STC8 microcontrollers with a familiar Arduino-like API.
 ## Arduino API Reference
 Below are the APIs that have been successfully tested. More APIs are currently under development.
 
-
 ### Digital I/O
 
 ```cpp
@@ -144,6 +143,130 @@ void loop() {
 }
 ```
 
+### I2C Communication
+
+The Wire library provides I2C master mode communication compatible with Arduino's Wire API.
+
+```cpp
+// Include I2C library
+#include "i2c.h"
+
+// Initialize I2C
+Wire.begin();                              // Default pins (P3.2=SCL, P3.3=SDA), 100kHz
+Wire.beginWithPins(I2C_PINS_P54_P55);     // Alternative pins (P5.4=SCL, P5.5=SDA)
+
+// Configure I2C clock
+Wire.setClock(I2C_CLOCK_100KHZ);          // 100 kHz (standard mode)
+Wire.setClock(I2C_CLOCK_400KHZ);          // 400 kHz (fast mode)
+
+// Write to I2C device
+Wire.beginTransmission(address);           // Start transmission (7-bit address)
+Wire.write(data);                          // Write byte
+Wire.endTransmission(true);                // End with STOP (true) or repeated START (false)
+
+// Read from I2C device
+Wire.requestFrom(address, quantity, true); // Request bytes, end with STOP
+while (Wire.available()) {
+  uint8_t data = Wire.read();              // Read received bytes
+}
+
+// Close I2C
+Wire.end();
+```
+
+**Pin Selection:**
+- `I2C_PINS_P32_P33` - SCL=P3.2, SDA=P3.3 (default)
+- `I2C_PINS_P54_P55` - SCL=P5.4, SDA=P5.5
+
+### RTC (DS1307/DS3231) Library
+
+A simple library for interfacing with DS1307 and DS3231 Real-Time Clock modules via I2C.
+
+```cpp
+// Include RTC library
+#include "rtc_ds1307.h"
+
+// Initialize RTC
+RTC_begin(I2C_PINS_P32_P33);  // or I2C_PINS_P54_P55
+
+// Set time
+RTC_setTime(year, month, date, hours, minutes, seconds, day);
+// year: 0-99 (2000-2099)
+// month: 1-12
+// date: 1-31
+// hours: 0-23 (24-hour format)
+// minutes: 0-59
+// seconds: 0-59
+// day: RTC_SUNDAY to RTC_SATURDAY (1-7)
+
+// Get time
+uint8_t year, month, date, hours, minutes, seconds, day;
+RTC_getTime(&year, &month, &date, &hours, &minutes, &seconds, &day);
+
+// Control oscillator
+bool running = RTC_isRunning();  // Check if clock is running
+RTC_start();                      // Start the clock
+RTC_stop();                       // Stop the clock (saves battery)
+```
+
+**Day of Week Constants:**
+```cpp
+RTC_SUNDAY    // 1
+RTC_MONDAY    // 2
+RTC_TUESDAY   // 3
+RTC_WEDNESDAY // 4
+RTC_THURSDAY  // 5
+RTC_FRIDAY    // 6
+RTC_SATURDAY  // 7
+```
+
+**Complete RTC Example:**
+```cpp
+#include "rtc_ds1307.h"
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("RTC Test");
+  
+  // Initialize RTC on P5.4/P5.5
+  if (RTC_begin(I2C_PINS_P54_P55)) {
+    Serial.println("RTC initialized");
+    
+    // Set time: 12:30:00, Saturday, Dec 13, 2025
+    RTC_setTime(25, 12, 13, 12, 30, 0, RTC_SATURDAY);
+  } else {
+    Serial.println("RTC not found!");
+  }
+}
+
+void loop() {
+  uint8_t year, month, date, hours, minutes, seconds, day;
+  
+  if (RTC_getTime(&year, &month, &date, &hours, &minutes, &seconds, &day)) {
+    // Print time
+    Serial.print("Time: ");
+    Serial.printNumber(hours);
+    Serial.print(":");
+    if (minutes < 10) Serial.print("0");
+    Serial.printNumber(minutes);
+    Serial.print(":");
+    if (seconds < 10) Serial.print("0");
+    Serial.printNumber(seconds);
+    
+    // Print date
+    Serial.print("  Date: ");
+    Serial.printNumber(date);
+    Serial.print("/");
+    Serial.printNumber(month);
+    Serial.print("/20");
+    Serial.printNumber(year);
+    Serial.println("");
+  }
+  
+  delay_ms(1000);
+}
+```
+
 ### External Interrupts
 
 > Note: P3_2 and P3_3 can using FALLING, RISING or CHANGE modes, while other pins only support FALLING mode.
@@ -196,10 +319,10 @@ void loop() {
 |------------|-----|--------------|-----------|
 | P3_0 |0| P3.0 | GPIO, RX (UART alt), INT4 |
 | P3_1 |1| P3.1 | GPIO, TX (UART alt) |
-| P3_2 |2| P3.2 | GPIO, RX (UART alt), INT0 |
-| P3_3 |3| P3.3 | GPIO, TX (UART alt), INT1 |
-| P5_4 |4| P5.4 | GPIO, RX (UART alt), INT2 |
-| P5_5 |5| P5.5 | GPIO, TX (UART alt), INT3 |
+| P3_2 |2| P3.2 | GPIO, RX (UART alt), INT0, I2C SCL |
+| P3_3 |3| P3.3 | GPIO, TX (UART alt), INT1, I2C SDA |
+| P5_4 |4| P5.4 | GPIO, RX (UART alt), INT2, I2C SCL |
+| P5_5 |5| P5.5 | GPIO, TX (UART alt), INT3, I2C SDA |
 
 ## Examples
 
@@ -210,6 +333,8 @@ The core includes several examples demonstrating basic functionality:
 - **Interrupt** - Using external interrupts
 - **Millis_Micros** - Non-blocking timing with millis()/micros()
 - **Serial** - Serial communication and echo
+- **I2C_Scanner** - Scan for I2C devices on the bus
+- **RTC_Clock** - Real-time clock with DS1307/DS3231
 
 Access examples via: **File → Examples → 1. STC8G Examples**
 
@@ -256,20 +381,14 @@ Select frequency via **Tools → Clock Speed** menu.
 ### SDCC Specific
 - This core uses SDCC compiler
 - Some C++ features may be limited
-- Use `__reentrant` on Serial functions with parameters to ensure interrupt-safe execution under SDCC.
+- Use `__reentrant` on functions with parameters that may be called from interrupts to ensure thread-safe execution under SDCC
 - Global variables default to internal RAM (limited to 256 bytes)
 
-<!-- ## Troubleshooting
-
-### Upload Issues
-- **No response from MCU:** Ensure power cycle during upload
-- **Wrong baud rate:** Try different clock frequencies
-- **Permission denied (Linux):** Add user to dialout group: `sudo usermod -a -G dialout $USER`
-
-### Compilation Errors
-- **Sketch too big:** Reduce code size or remove unused libraries
-- **Out of memory:** Use `__xdata` for large arrays
-- **Undefined reference:** Ensure all functions are declared before use -->
+### I2C Notes
+- Maximum I2C buffer size: 32 bytes
+- Supports 100kHz and 400kHz clock speeds
+- Master mode only (slave mode not implemented)
+- Always use open-drain with pull-up configuration for I2C pins
 
 ## Contributing
 
@@ -281,7 +400,7 @@ Contributions are welcome! Please:
 ## Resources
 
 - **GitHub Repository:** https://github.com/thevien257/STC_Arduino_Core
-- **STC8G Documentation:** (https://www.stcmicro.com/stc/stc8g1k08.html
+- **STC8G Documentation:** https://www.stcmicro.com/stc/stc8g1k08.html
 - **Arduino Reference:** https://www.arduino.cc/reference/en/
 
 ## Submit Bugs
