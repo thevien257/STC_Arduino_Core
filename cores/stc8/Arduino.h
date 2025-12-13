@@ -10,10 +10,12 @@
 // Arduino Pin Definitions (map to STC8G pins)
 #define LED_BUILTIN 13
 
-// Pin modes
+// Pin mode definitions
 #define INPUT           0x00
 #define OUTPUT          0x01
 #define INPUT_PULLUP    0x02
+#define OUTPUT_OD       0x03  // Open-drain output
+#define OUTPUT_OD_PU    0x04  // Open-drain output with pull-up
 
 // Digital values
 #define LOW     0
@@ -73,18 +75,67 @@
 #define MAKE_WORD(h, l) ((uint16_t)(((h) << 8) | (l)))
 
 // ====================================================================================
+// EXTENDED RAM/SFR ACCESS (XFR) HELPERS
+// ====================================================================================
+
+// Enable access to extended SFRs (XDATA registers like I2C, clock, etc.)
+#define ENABLE_XFR()  SET_BIT(P_SW2, 7)
+
+// Disable extended SFR access
+#define DISABLE_XFR() CLEAR_BIT(P_SW2, 7)
+
+// ====================================================================================
+// GENERIC PERIPHERAL PIN SWITCH HELPERS
+// ====================================================================================
+
+// Switch peripheral pins (P_SW1 register - UART1, CCP, SPI)
+#define SWITCH_PERIPHERAL_P_SW1(mask, value) do { \
+    P_SW1 = (P_SW1 & ~(mask)) | (value); \
+} while(0)
+
+// Switch peripheral pins (P_SW2 register - UART2/3/4, I2C, Comparator)
+#define SWITCH_PERIPHERAL_P_SW2(mask, value) do { \
+    uint8_t _xfr_backup = P_SW2 & 0x80; \
+    ENABLE_XFR(); \
+    P_SW2 = (P_SW2 & ~(mask)) | (value); \
+    if (!_xfr_backup) DISABLE_XFR(); \
+} while(0)
+
+// ====================================================================================
+// SPECIFIC PERIPHERAL PIN SWITCH HELPERS
+// ====================================================================================
+
+// UART1 Pin Switch (uses P_SW1 bits 7:6)
+#define UART1_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW1(0xC0, pins)
+
+// I2C Pin Switch (uses P_SW2 bits 5:4)
+#define I2C_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW2(0x30, pins)
+
+// SPI Pin Switch (uses P_SW1 bits 3:2)
+#define SPI_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW1(0x0C, pins)
+
+// CCP/PCA Pin Switch (uses P_SW1 bits 5:4)
+#define CCP_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW1(0x30, pins)
+
+// UART2 Pin Switch (uses P_SW2 bit 0)
+#define UART2_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW2(0x01, pins)
+
+// UART3 Pin Switch (uses P_SW2 bit 1)
+#define UART3_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW2(0x02, pins)
+
+// UART4 Pin Switch (uses P_SW2 bit 2)
+#define UART4_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW2(0x04, pins)
+
+// Comparator Pin Switch (uses P_SW2 bit 3)
+#define CMPO_SWITCH_PINS(pins) SWITCH_PERIPHERAL_P_SW2(0x08, pins)
+
+// ====================================================================================
+// SYSTEM FUNCTIONS
+// ====================================================================================
+
 void clock_init(void);
 
-// GPIO functions
-// void pinMode(uint8_t pin, uint8_t mode);
-// void digitalWrite(uint8_t pin, uint8_t value);
-// uint8_t digitalRead(uint8_t pin);
-
-// Timer 0 mode definitions
-// void timer0_init();
-// void delay_us(uint32_t us);
-// void delay_ms(uint16_t ms);
-// void delay_s(uint8_t seconds);
+// Timer functions
 uint32_t micros(void);
 uint32_t millis(void);
 
