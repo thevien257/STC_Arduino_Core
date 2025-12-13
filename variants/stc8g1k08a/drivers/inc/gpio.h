@@ -8,7 +8,7 @@
 #define GET_PORT(pin)  (((pin) < 4) ? PORT3 : PORT5)  // Pins 0-3 → port 3, 4+ → port 5
 #define GET_MASK(pin)  (1 << (pin))  // Direct mask from pin number
 
-// pinMode macro
+// pinMode macro - now supports open-drain modes
 #define pinMode(pin, mode) do { \
     uint8_t _port = GET_PORT(pin); \
     uint8_t _mask = GET_MASK(pin); \
@@ -16,14 +16,27 @@
     if (_port == PORT3) { \
         SET_BIT_MASK(P3IE, _mask); \
         if ((mode) == OUTPUT) { \
+            /* Push-pull output */ \
             CLEAR_BIT(P3M1, (pin)); \
             SET_BIT(P3M0, (pin)); \
             CLEAR_BIT(P3PU, (pin)); \
+        } else if ((mode) == OUTPUT_OD) { \
+            /* Open-drain output, no pull-up */ \
+            SET_BIT(P3M1, (pin)); \
+            SET_BIT(P3M0, (pin)); \
+            CLEAR_BIT(P3PU, (pin)); \
+        } else if ((mode) == OUTPUT_OD_PU) { \
+            /* Open-drain output with pull-up */ \
+            SET_BIT(P3M1, (pin)); \
+            SET_BIT(P3M0, (pin)); \
+            SET_BIT(P3PU, (pin)); \
         } else if ((mode) == INPUT_PULLUP) { \
+            /* High-impedance input with pull-up */ \
             SET_BIT(P3M1, (pin)); \
             CLEAR_BIT(P3M0, (pin)); \
             SET_BIT(P3PU, (pin)); \
         } else { \
+            /* High-impedance input, no pull-up */ \
             SET_BIT(P3M1, (pin)); \
             CLEAR_BIT(P3M0, (pin)); \
             CLEAR_BIT(P3PU, (pin)); \
@@ -31,18 +44,55 @@
     } else if (_port == PORT5) { \
         SET_BIT_MASK(P5IE, _mask); \
         if ((mode) == OUTPUT) { \
+            /* Push-pull output */ \
             CLEAR_BIT(P5M1, (pin)); \
             SET_BIT(P5M0, (pin)); \
             CLEAR_BIT(P5PU, (pin)); \
+        } else if ((mode) == OUTPUT_OD) { \
+            /* Open-drain output, no pull-up */ \
+            SET_BIT(P5M1, (pin)); \
+            SET_BIT(P5M0, (pin)); \
+            CLEAR_BIT(P5PU, (pin)); \
+        } else if ((mode) == OUTPUT_OD_PU) { \
+            /* Open-drain output with pull-up */ \
+            SET_BIT(P5M1, (pin)); \
+            SET_BIT(P5M0, (pin)); \
+            SET_BIT(P5PU, (pin)); \
         } else if ((mode) == INPUT_PULLUP) { \
+            /* High-impedance input with pull-up */ \
             SET_BIT(P5M1, (pin)); \
             CLEAR_BIT(P5M0, (pin)); \
             SET_BIT(P5PU, (pin)); \
         } else { \
+            /* High-impedance input, no pull-up */ \
             SET_BIT(P5M1, (pin)); \
             CLEAR_BIT(P5M0, (pin)); \
             CLEAR_BIT(P5PU, (pin)); \
         } \
+    } \
+    CLEAR_BIT(P_SW2, 7); \
+} while(0)
+
+// Enable internal pull-up resistor (for input or open-drain pins)
+#define enablePullUp(pin) do { \
+    uint8_t _port = GET_PORT(pin); \
+    SET_BIT(P_SW2, 7); \
+    if (_port == PORT3) { \
+        SET_BIT(P3PU, (pin)); \
+    } else if (_port == PORT5) { \
+        SET_BIT(P5PU, (pin)); \
+    } \
+    CLEAR_BIT(P_SW2, 7); \
+} while(0)
+
+// Disable internal pull-up resistor
+#define disablePullUp(pin) do { \
+    uint8_t _port = GET_PORT(pin); \
+    SET_BIT(P_SW2, 7); \
+    if (_port == PORT3) { \
+        CLEAR_BIT(P3PU, (pin)); \
+    } else if (_port == PORT5) { \
+        CLEAR_BIT(P5PU, (pin)); \
     } \
     CLEAR_BIT(P_SW2, 7); \
 } while(0)
