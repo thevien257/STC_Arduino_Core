@@ -9,7 +9,8 @@ static volatile __xdata uint8_t rx_buffer[SERIAL_RX_BUFFER_SIZE];
 static volatile uint8_t rx_head = 0;
 static volatile uint8_t rx_tail = 0;
 
-static UartPinSelect_t current_pins = UART_PINS_DEFAULT;
+// Move to XRAM to save internal RAM
+static __xdata UartPinSelect_t current_pins = UART_PINS_DEFAULT;
 
 #define SERIAL_LINE_BUFFER_SIZE 64
 static __xdata char serial_line_buffer[SERIAL_LINE_BUFFER_SIZE];
@@ -306,5 +307,5 @@ Serial_t Serial = {
     .println = serial_println,
     .printNumber = serial_print_number,
     .readString = serial_read_string,
-    .readLine = serial_read_line, // NEW
+    .readLine = serial_read_line,
 };
